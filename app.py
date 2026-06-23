@@ -375,6 +375,30 @@ def render_ai_output(text: str) -> None:
     ai_safety_caption()
 
 
+def has_text(*values: Any) -> bool:
+    return any(str(value).strip() for value in values if value is not None)
+
+
+def clear_ai_output(key: str) -> None:
+    st.session_state[key] = "" if isinstance(st.session_state.get(key), str) else None
+
+
+def render_ai_prereq_hint(title: str, items: list[str]) -> None:
+    st.info(title + "\n\n" + "\n".join(f"• {item}" for item in items))
+
+
+def profile_is_ready() -> bool:
+    profile = st.session_state.get("profile")
+    plan = st.session_state.get("growth_plan", [])
+    if not profile or not isinstance(profile, dict):
+        return False
+    return has_text(
+        profile.get("nickname", ""),
+        profile.get("core_goal", ""),
+        profile.get("expected_deliverable", ""),
+    ) and bool(plan)
+
+
 def top_capabilities(capabilities: dict[str, int], reverse: bool = True, count: int = 2) -> list[str]:
     return [name for name, _ in sorted(capabilities.items(), key=lambda item: item[1], reverse=reverse)[:count]]
 
@@ -739,20 +763,35 @@ def render_home() -> None:
             '<br><span style="color:#667085">无API时使用本地规则稳定模式，有API时自动启用AI增强。</span></div>',
             unsafe_allow_html=True,
         )
+    st.caption("本功能依赖已生成的画像和成长计划。请先进入：成长旅程/智能画像，第2步填写预期交付，第4步填写主观成长问题和希望AI帮忙的任务，第5步确认90天核心目标。")
     if st.button("让AI帮我生成今日成长建议", type="primary", key="home_ai_advice"):
-        profile = st.session_state.profile or {"nickname": "新同学", "primary_role": "游戏策划", "secondary_role": "活动策划", "core_goal": "完成90天成长目标"}
-        completed = sum(task.get("status") == "已完成" for task in st.session_state.growth_plan)
-        total = len(st.session_state.growth_plan)
-        fallback = (
-            f"今天建议先聚焦一个最小可交付成果：围绕{profile.get('core_goal', '当前成长目标')}，选择1项真实业务任务推进。"
-            f"当前已完成{completed}/{total or 0}项任务，优先补齐证据来源、AI输出核验和导师校准记录。"
-            "如果时间有限，先交付一页可验证成果，而不是继续扩大学习范围。"
-        )
-        prompt = (
-            f"新人画像：{profile}\n任务进度：{completed}/{total}\n风险：{st.session_state.risk_level}\n"
-            f"最近事件：{st.session_state.current_event}\n请生成今日成长建议，包含优先任务、AI协作方式和需要人工确认的内容。"
-        )
-        st.session_state.ai_today_advice = optional_ai_text("今日成长建议", prompt, fallback)
+        if not profile_is_ready():
+            clear_ai_output("ai_today_advice")
+            st.warning("请先完成智能画像五步并生成成长策略，或点击首页“一键体验完整90天”载入模拟画像后，再生成今日成长建议。")
+            render_ai_prereq_hint(
+                "生成今日成长建议前，需要先补充这些信息：",
+                [
+                    "智能画像第1步：填写新人昵称和岗位。",
+                    "智能画像第2步：填写“90天内预期交付成果”。",
+                    "智能画像第4步：填写“用自己的话描述你现在最想解决的成长问题”和“你希望AI在哪些任务上帮你”。",
+                    "智能画像第5步：确认“90天核心目标”，并点击“生成诊断与成长策略”。",
+                    "或者：首页点击“一键体验完整90天”载入模拟画像后再生成。",
+                ],
+            )
+        else:
+            profile = st.session_state.profile
+            completed = sum(task.get("status") == "已完成" for task in st.session_state.growth_plan)
+            total = len(st.session_state.growth_plan)
+            fallback = (
+                f"今天建议先聚焦一个最小可交付成果：围绕{profile.get('core_goal', '当前成长目标')}，选择1项真实业务任务推进。"
+                f"当前已完成{completed}/{total or 0}项任务，优先补齐证据来源、AI输出核验和导师校准记录。"
+                "如果时间有限，先交付一页可验证成果，而不是继续扩大学习范围。"
+            )
+            prompt = (
+                f"新人画像：{profile}\n任务进度：{completed}/{total}\n风险：{st.session_state.risk_level}\n"
+                f"最近事件：{st.session_state.current_event}\n请生成今日成长建议，包含优先任务、AI协作方式和需要人工确认的内容。"
+            )
+            st.session_state.ai_today_advice = optional_ai_text("今日成长建议", prompt, fallback)
     if st.session_state.ai_today_advice:
         render_ai_output(st.session_state.ai_today_advice)
 
@@ -831,6 +870,15 @@ def wizard_navigation(step: int) -> None:
                 st.session_state.pending_adjustment = None
                 st.session_state.dynamic_task_counter = 0
                 st.session_state.llm_hr_brief = None
+                st.session_state.ai_today_advice = ""
+                st.session_state.ai_profile_interpretation = ""
+                st.session_state.ai_profile_signature = ""
+                st.session_state.ai_diagnosis_summary = ""
+                st.session_state.ai_growth_config = None
+                st.session_state.ai_review_feedback = ""
+                st.session_state.ai_demo_narration = ""
+                st.session_state.ai_mentor_questions = ""
+                st.session_state.ai_hr_insight = ""
                 for task in st.session_state.growth_plan:
                     st.session_state[f"task_status_{task['id']}"] = "未开始"
                 st.session_state.demo_requested = profile["enter_auto_demo"]
@@ -919,6 +967,15 @@ def render_wizard() -> None:
     with st.expander("AI画像解读", expanded=bool(st.session_state.ai_profile_interpretation)):
         render_ai_mode_hint()
         st.caption("根据已填写的岗位、AI能力、学习偏好和主观目标生成辅助解读。")
+        render_ai_prereq_hint(
+            "AI画像解读会读取以下关键变量：",
+            [
+                "第2步“工作场景”：90天内预期交付成果。",
+                "第4步“学习方式”：用自己的话描述你现在最想解决的成长问题。",
+                "第4步“学习方式”：你希望AI在哪些任务上帮你。",
+                "第5步“确认目标”：90天核心目标。",
+            ],
+        )
         button_label = "重新生成AI画像解读" if st.session_state.ai_profile_interpretation else "生成AI画像解读"
         if st.button(button_label, key="generate_ai_profile_interpretation"):
             subjective_problem = st.session_state.wizard_subjective_problem.strip()
@@ -926,12 +983,17 @@ def render_wizard() -> None:
             expected_deliverable = st.session_state.wizard_expected_deliverable.strip()
             core_goal = st.session_state.wizard_core_goal.strip()
             if not any([subjective_problem, ai_help_tasks, expected_deliverable, core_goal]):
-                st.warning("请至少填写一个主观目标、预期交付或希望AI帮忙的任务，再生成AI画像解读。")
+                clear_ai_output("ai_profile_interpretation")
+                st.session_state.ai_profile_signature = ""
+                st.warning("请先补充至少一个关键变量：第2步“90天内预期交付成果”、第4步“主观成长问题/希望AI帮忙的任务”，或第5步“90天核心目标”，再生成AI画像解读。")
                 return
             profile_preview = collect_profile()
             diagnosis_preview = calculate_ai_diagnosis({key: st.session_state[key] for key in AI_QUESTIONS})
             signature = build_profile_input_signature(profile_preview, diagnosis_preview)
-            weak_dimensions = [name for name, score in diagnosis_preview.items() if name in {"AI工具使用", "AI结果验证", "AI业务应用", "AI安全意识"} and score < 55]
+            weak_dimensions = [
+                name for name, score in diagnosis_preview["dimensions"].items()
+                if name in {"AI工具使用", "AI结果验证", "AI业务应用", "AI安全意识"} and score < 55
+            ]
             user_goal = expected_deliverable or core_goal or "尚未填写"
             fallback = (
                 f"1.我读取到的关键信息：你当前最想解决的问题是：{subjective_problem or '尚未填写'}；"
@@ -1080,22 +1142,28 @@ def render_diagnosis_report() -> None:
         st.warning(risk)
     st.markdown("### AI诊断摘要")
     render_ai_mode_hint()
+    st.caption("本摘要依赖已完成的智能画像和成长目标。若内容不准确，请回到智能画像第2步修改预期交付、第4步修改主观成长问题、第5步修改90天核心目标后重新生成诊断。")
     tone = st.radio("选择报告口吻", ["严肃导师版", "鼓励陪伴版", "HR汇报版"], horizontal=True, key="ai_diagnosis_tone")
     if st.button("AI解读我的诊断结果", key="generate_ai_diagnosis_summary"):
-        capabilities = diagnosis["capabilities"]
-        strengths = top_capabilities(capabilities, True, 2)
-        gaps = top_capabilities(capabilities, False, 2)
-        fallback = (
-            f"优势：当前最稳的是{'、'.join(strengths)}，可以作为进入真实任务的起点。\n\n"
-            f"短板：最需要补齐的是{'、'.join(gaps)}，建议用小任务验证而不是只补理论。\n\n"
-            f"风险：未来30天最容易卡在证据不足、AI输出未核验或任务范围过大。\n\n"
-            f"建议：优先组合“1个真实业务观察+1次AI核验练习+1次导师校准”，口吻：{tone}。"
-        )
-        prompt = (
-            f"画像：{profile}\n诊断：{diagnosis}\n报告口吻：{tone}\n"
-            "请输出优势、短板、风险、建议四段。不要作正式人才评价。"
-        )
-        st.session_state.ai_diagnosis_summary = optional_ai_text("诊断报告解读", prompt, fallback, temperature=0.35)
+        if not profile_is_ready():
+            clear_ai_output("ai_diagnosis_summary")
+            st.warning("请先完成智能画像并生成成长策略。")
+        else:
+            capabilities = diagnosis["capabilities"]
+            strengths = top_capabilities(capabilities, True, 2)
+            gaps = top_capabilities(capabilities, False, 2)
+            fallback = (
+                f"优势：当前最稳的是{'、'.join(strengths)}，可以作为进入真实任务的起点。\n\n"
+                f"短板：最需要补齐的是{'、'.join(gaps)}，建议用小任务验证而不是只补理论。\n\n"
+                f"风险：未来30天最容易卡在证据不足、AI输出未核验或任务范围过大。\n\n"
+                f"建议：围绕“{profile.get('expected_deliverable') or profile.get('core_goal')}”优先组合“1个真实业务观察+1次AI核验练习+1次导师校准”，口吻：{tone}。"
+            )
+            prompt = (
+                f"画像：{profile}\n诊断：{diagnosis}\n报告口吻：{tone}\n"
+                f"预期交付：{profile.get('expected_deliverable')}\n90天目标：{profile.get('core_goal')}\n"
+                "请输出优势、短板、风险、建议四段。不要作正式人才评价。"
+            )
+            st.session_state.ai_diagnosis_summary = optional_ai_text("诊断报告解读", prompt, fallback, temperature=0.35)
     if st.session_state.ai_diagnosis_summary:
         render_ai_output(st.session_state.ai_diagnosis_summary)
     st.markdown('<div class="ai-note"><strong>AI使用安全提示</strong><br>任何个人隐私、账号密钥、未公开经营数据、商业机密、受限代码和未经授权的内部材料都不得输入AI。AI输出不能替代事实核验和业务责任。</div>', unsafe_allow_html=True)
@@ -1532,6 +1600,7 @@ def render_growth_map() -> None:
     )
     with st.expander("AI任务配置器", expanded=False):
         render_ai_mode_hint()
+        st.caption("请至少填写“当前最紧急业务任务”或“最担心的能力短板”，否则AI无法判断本周排序依据。")
         c1, c2, c3 = st.columns(3)
         with c1:
             weekly_hours = st.number_input("本周可投入时间", min_value=1, max_value=40, value=int(profile.get("weekly_growth_hours", 6)), key="ai_growth_hours")
@@ -1540,27 +1609,31 @@ def render_growth_map() -> None:
         with c3:
             weak_spot = st.text_input("最担心的能力短板", key="ai_growth_weak")
         if st.button("AI调整本周成长路径", key="generate_ai_growth_config"):
-            open_tasks = [task for task in plan if task["status"] not in {"已完成"}]
-            priority_tasks = open_tasks[:2]
-            delayed_task = open_tasks[2]["name"] if len(open_tasks) > 2 else "暂无需要推迟的任务"
-            mentor_needed = "是" if weekly_hours <= 4 or "信心" in weak_spot or "核验" in weak_spot else "建议轻量校准"
-            fallback = (
-                f"建议优先做：1.{priority_tasks[0]['name'] if priority_tasks else '提交一项成长证据'}；"
-                f"2.{priority_tasks[1]['name'] if len(priority_tasks) > 1 else '完成AI结果核验清单'}。\n\n"
-                f"可以推迟：{delayed_task}。\n\n"
-                f"是否需要导师介入：{mentor_needed}。\n\n"
-                f"排序原因：本周可投入{weekly_hours}小时，需先围绕“{urgent_task or profile['core_goal']}”形成可验证成果，再处理“{weak_spot or 'AI结果验证'}”。\n\n"
-                "任务难度：中。"
-            )
-            prompt = (
-                f"画像：{profile}\n未完成任务：{open_tasks[:6]}\n本周时间：{weekly_hours}\n"
-                f"紧急业务：{urgent_task}\n担心短板：{weak_spot}\n"
-                "请给出本周2个优先任务、1个可推迟任务、导师介入建议、排序原因和难度。"
-            )
-            st.session_state.ai_growth_config = {
-                "text": optional_ai_text("AI任务配置器", prompt, fallback),
-                "accepted": False,
-            }
+            if not has_text(urgent_task, weak_spot):
+                clear_ai_output("ai_growth_config")
+                st.warning("请先填写“当前最紧急业务任务”或“最担心的能力短板”，再生成本周成长路径调整建议。")
+            else:
+                open_tasks = [task for task in plan if task["status"] not in {"已完成"}]
+                priority_tasks = open_tasks[:2]
+                delayed_task = open_tasks[2]["name"] if len(open_tasks) > 2 else "暂无需要推迟的任务"
+                mentor_needed = "是" if weekly_hours <= 4 or "信心" in weak_spot or "核验" in weak_spot else "建议轻量校准"
+                fallback = (
+                    f"建议优先做：1.{priority_tasks[0]['name'] if priority_tasks else '提交一项成长证据'}；"
+                    f"2.{priority_tasks[1]['name'] if len(priority_tasks) > 1 else '完成AI结果核验清单'}。\n\n"
+                    f"可以推迟：{delayed_task}。\n\n"
+                    f"是否需要导师介入：{mentor_needed}。\n\n"
+                    f"排序原因：本周可投入{weekly_hours}小时，需先围绕“{urgent_task or profile['core_goal']}”形成可验证成果，再处理“{weak_spot or 'AI结果验证'}”。\n\n"
+                    "任务难度：中。"
+                )
+                prompt = (
+                    f"画像：{profile}\n未完成任务：{open_tasks[:6]}\n本周时间：{weekly_hours}\n"
+                    f"当前最紧急业务任务：{urgent_task}\n最担心的能力短板：{weak_spot}\n"
+                    "请给出本周2个优先任务、1个可推迟任务、导师介入建议、排序原因和难度。"
+                )
+                st.session_state.ai_growth_config = {
+                    "text": optional_ai_text("AI任务配置器", prompt, fallback),
+                    "accepted": False,
+                }
         if st.session_state.ai_growth_config:
             render_ai_output(st.session_state.ai_growth_config["text"])
             a1, a2 = st.columns(2)
@@ -1826,6 +1899,7 @@ def render_auto_demo() -> None:
     render_demo_disclaimer()
     st.markdown('<div class="section-title">90天自动演示</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="section-sub">通过{len(DEMO_EVENTS)}个关键事件展示系统如何监测成长、评价证据、调整任务、触发导师介入并形成组织信号。</div>', unsafe_allow_html=True)
+    st.caption("请先点击“随机生成一次90天成长剧本”，系统才会基于随机剧本和当前演示事件生成AI旁白。")
     if st.button("随机生成一次90天成长剧本", key="randomize_demo_script"):
         seed = random.randint(1000, 999999)
         rng = random.Random(seed)
@@ -1849,23 +1923,27 @@ def render_auto_demo() -> None:
             unsafe_allow_html=True,
         )
         if st.button("生成AI旁白", key="generate_demo_narration"):
-            event = DEMO_EVENTS[min(st.session_state.demo_step, len(DEMO_EVENTS) - 1)]
-            event_title = event.get("title", "当前事件")
-            event_detail = event.get("detail", "")
-            event_adjustment = event.get("adjustment", "")
-            fallback = (
-                f"当前发生了：{event_title}。{event_detail}"
-                f"系统调整逻辑：{event_adjustment}"
-                "新人应先明确最小交付物，核验AI输出来源，再向导师同步需要决策的风险。"
-            )
-            prompt = (
-                f"当前事件标题：{event_title}\n"
-                f"事件详情：{event_detail}\n"
-                f"系统调整：{event_adjustment}\n"
-                f"随机剧本：{script}\n"
-                "请生成当前发生了什么、为什么这样调整、新人如何应对三段旁白。"
-            )
-            st.session_state.ai_demo_narration = optional_ai_text("90天自动演示AI旁白", prompt, fallback)
+            if not st.session_state.demo_random_script:
+                clear_ai_output("ai_demo_narration")
+                st.warning("请先随机生成一次90天成长剧本，再生成AI旁白。")
+            else:
+                event = DEMO_EVENTS[min(st.session_state.demo_step, len(DEMO_EVENTS) - 1)]
+                event_title = event.get("title", "当前事件")
+                event_detail = event.get("detail", "")
+                event_adjustment = event.get("adjustment", "")
+                fallback = (
+                    f"当前发生了：{event_title}。{event_detail}"
+                    f"系统调整逻辑：{event_adjustment}"
+                    "新人应先明确最小交付物，核验AI输出来源，再向导师同步需要决策的风险。"
+                )
+                prompt = (
+                    f"当前事件标题：{event_title}\n"
+                    f"事件详情：{event_detail}\n"
+                    f"系统调整：{event_adjustment}\n"
+                    f"随机剧本：{script}\n"
+                    "请生成当前发生了什么、为什么这样调整、新人如何应对三段旁白。"
+                )
+                st.session_state.ai_demo_narration = optional_ai_text("90天自动演示AI旁白", prompt, fallback)
         if st.session_state.ai_demo_narration:
             render_ai_output(st.session_state.ai_demo_narration)
     if not hasattr(st, "fragment"):
@@ -2033,6 +2111,7 @@ def render_weekly_review() -> None:
         st.rerun()
     with st.expander("AI复盘教练", expanded=False):
         render_ai_mode_hint()
+        st.caption("请至少填写“本周做成了什么/哪里卡住了/下周最想改善什么”之一，或先点击“加载模拟复盘”。")
         left, middle, right = st.columns(3)
         with left:
             st.text_area("本周做成了什么？", key="review_subjective_done")
@@ -2041,21 +2120,36 @@ def render_weekly_review() -> None:
         with right:
             st.text_area("下周最想改善什么？", key="review_subjective_next")
         if st.button("生成AI复盘反馈", key="generate_ai_review_feedback"):
-            fallback_risk = "暂无明显风险" if len(st.session_state.review_unfinished) <= 1 and st.session_state.review_confidence >= 3 else "存在任务延期或信心不足风险"
-            fallback = (
-                f"本周成长总结：你完成了“{st.session_state.review_subjective_done or st.session_state.review_output or '若干基础任务'}”，已经形成可复盘素材。\n\n"
-                f"卡点归因：主要卡在“{st.session_state.review_subjective_blocked or st.session_state.review_difficulty or '任务范围和证据核验'}”，需要把问题拆成可验证的小动作。\n\n"
-                f"下周行动建议：围绕“{st.session_state.review_subjective_next or '补齐一项真实成果证据'}”安排3个优先任务，并保留一次导师校准。\n\n"
-                f"给导师的一句话同步：我需要你帮我确认任务边界、证据质量和AI输出是否经过人工验证。\n\n"
-                f"给HR的风险提示：{fallback_risk}。"
+            has_review_input = has_text(
+                st.session_state.review_subjective_done,
+                st.session_state.review_subjective_blocked,
+                st.session_state.review_subjective_next,
+                st.session_state.review_output,
+                st.session_state.review_difficulty,
+                " ".join(st.session_state.review_completed),
+                " ".join(st.session_state.review_unfinished),
             )
-            prompt = (
-                f"画像：{st.session_state.profile}\n"
-                f"做成：{st.session_state.review_subjective_done}\n卡住：{st.session_state.review_subjective_blocked}\n"
-                f"改善：{st.session_state.review_subjective_next}\n已有复盘字段：困难={st.session_state.review_difficulty}，成果={st.session_state.review_output}\n"
-                "请输出成长总结、卡点归因、下周行动、导师同步、HR风险提示。"
-            )
-            st.session_state.ai_review_feedback = optional_ai_text("AI复盘教练", prompt, fallback)
+            if not has_review_input:
+                clear_ai_output("ai_review_feedback")
+                st.warning("请先填写至少一项复盘内容，或点击“加载模拟复盘”，再生成AI复盘反馈。")
+            else:
+                fallback_risk = "暂无明显风险" if len(st.session_state.review_unfinished) <= 1 and st.session_state.review_confidence >= 3 else "存在任务延期或信心不足风险"
+                fallback = (
+                    f"本周成长总结：你完成了“{st.session_state.review_subjective_done or st.session_state.review_output or '已填写的复盘任务'}”，已经形成可复盘素材。\n\n"
+                    f"卡点归因：主要卡在“{st.session_state.review_subjective_blocked or st.session_state.review_difficulty or '待进一步拆解的任务阻塞'}”，需要把问题拆成可验证的小动作。\n\n"
+                    f"下周行动建议：围绕“{st.session_state.review_subjective_next or '补齐一项真实成果证据'}”安排3个优先任务，并保留一次导师校准。\n\n"
+                    f"给导师的一句话同步：我需要你帮我确认任务边界、证据质量和AI输出是否经过人工验证。\n\n"
+                    f"给HR的风险提示：{fallback_risk}。"
+                )
+                prompt = (
+                    f"画像：{st.session_state.profile}\n"
+                    f"本周做成了什么：{st.session_state.review_subjective_done}\n"
+                    f"本周哪里卡住了：{st.session_state.review_subjective_blocked}\n"
+                    f"下周最想改善什么：{st.session_state.review_subjective_next}\n"
+                    f"已有复盘字段：已完成={st.session_state.review_completed}，未完成={st.session_state.review_unfinished}，困难={st.session_state.review_difficulty}，成果={st.session_state.review_output}\n"
+                    "请输出成长总结、卡点归因、下周行动、导师同步、HR风险提示。"
+                )
+                st.session_state.ai_review_feedback = optional_ai_text("AI复盘教练", prompt, fallback)
         if st.session_state.ai_review_feedback:
             render_ai_output(st.session_state.ai_review_feedback)
     plan_names = [task["name"] for task in st.session_state.growth_plan]
@@ -2263,18 +2357,24 @@ def render_mentor_panel() -> None:
     )
     with st.expander("AI导师追问生成器", expanded=False):
         render_ai_mode_hint()
+        st.caption("请先输入新人提交的成果摘要、证据描述或导师观察，AI才会生成追问。")
         mentor_observation = st.text_area("请输入新人提交的成果摘要或导师观察", key="ai_mentor_observation")
         if st.button("生成导师追问", key="generate_ai_mentor_questions"):
-            fallback = (
-                "1.你这份成果最关键的业务证据来自哪里？考察点：证据来源是否可追溯。建议反馈：请补充原始材料或口径说明。是否需要补证：视证据完整度而定。\n\n"
-                "2.AI在其中具体做了哪些工作，哪些结论由你本人判断？考察点：人机边界。建议反馈：要求新人标注AI辅助、人工判断和最终责任。\n\n"
-                "3.如果方案上线后数据不符合预期，你下一步会怎么验证？考察点：行动计划和风险意识。建议反馈：引导其形成小流量验证或回滚方案。"
-            )
-            prompt = (
-                f"新人画像：{profile}\n当前阶段：{STAGE_DEFINITIONS[stage_index]['name']}\n导师观察：{mentor_observation}\n"
-                "请生成3个导师追问，每个包含考察点、反馈方式、是否需要补证。"
-            )
-            st.session_state.ai_mentor_questions = optional_ai_text("AI导师追问生成器", prompt, fallback)
+            if not has_text(mentor_observation):
+                clear_ai_output("ai_mentor_questions")
+                st.warning("请先输入新人提交的成果摘要或导师观察，再生成导师追问。")
+            else:
+                fallback = (
+                    f"基于导师观察“{mentor_observation}”，建议追问：\n\n"
+                    "1.你这份成果最关键的业务证据来自哪里？考察点：证据来源是否可追溯。建议反馈：请补充原始材料或口径说明。是否需要补证：视证据完整度而定。\n\n"
+                    "2.AI在其中具体做了哪些工作，哪些结论由你本人判断？考察点：人机边界。建议反馈：要求新人标注AI辅助、人工判断和最终责任。\n\n"
+                    "3.如果方案上线后数据不符合预期，你下一步会怎么验证？考察点：行动计划和风险意识。建议反馈：引导其形成小流量验证或回滚方案。"
+                )
+                prompt = (
+                    f"新人画像：{profile}\n当前阶段：{STAGE_DEFINITIONS[stage_index]['name']}\n导师观察：{mentor_observation}\n"
+                    "请生成3个导师追问，每个包含考察点、反馈方式、是否需要补证。"
+                )
+                st.session_state.ai_mentor_questions = optional_ai_text("AI导师追问生成器", prompt, fallback)
         if st.session_state.ai_mentor_questions:
             render_ai_output(st.session_state.ai_mentor_questions)
     render_mentor_acceptance()
@@ -2410,21 +2510,33 @@ def render_hr_dashboard() -> None:
             st.markdown(f'<div class="action-card" style="--card-color:#FFB45B"><strong>{escape(count)}·{escape(signal)}</strong><br>组织行动：{escape(action)}</div>', unsafe_allow_html=True)
     st.markdown("### 本周培养简报")
     fallback_brief = "本周20名模拟新人中，4人进入高风险，主要集中在业务高峰挤占成长时间、真实业务经验不足和AI结果验证薄弱。建议HR优先检查高风险新人的任务范围与导师容量，并将“证据化使用AI”加入共性训练。当前导师负载整体可控，但导师A与导师B承担的跨团队任务较多，应避免把带教质量完全依赖个人经验。"
-    if st.session_state.llm_hr_brief is None:
-        st.session_state.llm_hr_brief = optional_ai_enhance("生成HR培养简报", str(data), fallback_brief)
-    st.markdown(f'<div class="brief">{escape(st.session_state.llm_hr_brief)}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="brief">{escape(fallback_brief)}</div>', unsafe_allow_html=True)
     st.markdown("### AI组织洞察")
     render_ai_mode_hint()
+    st.caption("请先填写HR本周关注点或组织问题。AI只会基于模拟批次数据和你填写的关注点生成组织洞察。")
+    ai_hr_focus = st.text_area(
+        "请输入本周HR关注点或组织问题",
+        key="ai_hr_focus",
+        placeholder="例如：高风险新人集中在哪些岗位？导师负载是否过高？AI结果验证能力如何集中训练？",
+    )
     if st.button("生成HR组织洞察简报", key="generate_ai_hr_insight"):
-        fallback = (
-            f"当前新人群体风险：{high}名高风险、{medium}名需要关注，主要障碍集中在AI结果验证、真实业务机会和跨团队协作。\n\n"
-            "高潜特征：进度较高且风险较低的新人通常能主动提交证据、向导师校准边界，并记录AI核验过程。\n\n"
-            "需要导师介入的人群：高风险新人、进度低于50%且存在证据不足的人、导师负载过高团队中的新人。\n\n"
-            "组织层面培训建议：增加AI验证微课、脱敏任务池和导师检查点模板。\n\n"
-            "下一轮培养机制优化：把成长任务与真实项目合并，减少纯理论学习堆叠。"
-        )
-        prompt = f"HR模拟批次数据：{data}\n请生成新人群体风险、高潜特征、导师介入人群、组织培训建议和机制优化。"
-        st.session_state.ai_hr_insight = optional_ai_text("AI组织洞察简报", prompt, fallback)
+        if not has_text(ai_hr_focus):
+            clear_ai_output("ai_hr_insight")
+            st.warning("请先填写本周HR关注点或组织问题，再生成AI组织洞察简报。")
+        else:
+            fallback = (
+                f"围绕HR本周关注点“{ai_hr_focus}”，当前新人群体风险为：{high}名高风险、{medium}名需要关注，主要障碍集中在AI结果验证、真实业务机会和跨团队协作。\n\n"
+                "高潜特征：进度较高且风险较低的新人通常能主动提交证据、向导师校准边界，并记录AI核验过程。\n\n"
+                "需要导师介入的人群：高风险新人、进度低于50%且存在证据不足的人、导师负载过高团队中的新人。\n\n"
+                "组织层面培训建议：增加AI验证微课、脱敏任务池和导师检查点模板。\n\n"
+                "下一轮培养机制优化：把成长任务与真实项目合并，减少纯理论学习堆叠。"
+            )
+            prompt = (
+                f"HR本周关注点：{ai_hr_focus}\n"
+                f"HR模拟批次数据：{data}\n"
+                "请生成新人群体风险、高潜特征、导师介入人群、组织培训建议和机制优化。"
+            )
+            st.session_state.ai_hr_insight = optional_ai_text("AI组织洞察简报", prompt, fallback)
     if st.session_state.ai_hr_insight:
         render_ai_output(st.session_state.ai_hr_insight)
     st.markdown("### 建议组织层面增加的培训或资源")
