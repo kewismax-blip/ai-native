@@ -298,7 +298,7 @@ def init_state() -> None:
         "demo_evidence_stage": "未提交", "demo_evidence_task_id": None,
         "task_status_overrides": {},
         "llm_hr_brief": None,
-        "ai_today_advice": "", "ai_profile_interpretation": "", "ai_diagnosis_summary": "",
+        "ai_today_advice": "", "ai_profile_interpretation": "", "ai_profile_signature": "", "ai_diagnosis_summary": "",
         "ai_growth_config": None, "ai_review_feedback": "", "ai_demo_narration": "",
         "ai_mentor_questions": "", "ai_hr_insight": "", "demo_random_seed": None, "demo_random_script": None,
         "game": initial_game_state(),
@@ -377,6 +377,18 @@ def render_ai_output(text: str) -> None:
 
 def top_capabilities(capabilities: dict[str, int], reverse: bool = True, count: int = 2) -> list[str]:
     return [name for name, _ in sorted(capabilities.items(), key=lambda item: item[1], reverse=reverse)[:count]]
+
+
+def build_profile_input_signature(profile: dict[str, Any], diagnosis: dict[str, Any]) -> str:
+    payload = {
+        "profile": profile,
+        "diagnosis": diagnosis,
+        "subjective_problem": st.session_state.get("wizard_subjective_problem", ""),
+        "ai_help_tasks": st.session_state.get("wizard_ai_help_tasks", ""),
+        "core_goal": st.session_state.get("wizard_core_goal", ""),
+        "expected_deliverable": st.session_state.get("wizard_expected_deliverable", ""),
+    }
+    return hashlib.md5(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def sync_secondary_role() -> None:
@@ -907,27 +919,58 @@ def render_wizard() -> None:
     with st.expander("AI画像解读", expanded=bool(st.session_state.ai_profile_interpretation)):
         render_ai_mode_hint()
         st.caption("根据已填写的岗位、AI能力、学习偏好和主观目标生成辅助解读。")
-        if st.button("生成AI画像解读", key="generate_ai_profile_interpretation"):
+        button_label = "重新生成AI画像解读" if st.session_state.ai_profile_interpretation else "生成AI画像解读"
+        if st.button(button_label, key="generate_ai_profile_interpretation"):
+            subjective_problem = st.session_state.wizard_subjective_problem.strip()
+            ai_help_tasks = st.session_state.wizard_ai_help_tasks.strip()
+            expected_deliverable = st.session_state.wizard_expected_deliverable.strip()
+            core_goal = st.session_state.wizard_core_goal.strip()
+            if not any([subjective_problem, ai_help_tasks, expected_deliverable, core_goal]):
+                st.warning("请至少填写一个主观目标、预期交付或希望AI帮忙的任务，再生成AI画像解读。")
+                return
             profile_preview = collect_profile()
             diagnosis_preview = calculate_ai_diagnosis({key: st.session_state[key] for key in AI_QUESTIONS})
+            signature = build_profile_input_signature(profile_preview, diagnosis_preview)
             weak_dimensions = [name for name, score in diagnosis_preview.items() if name in {"AI工具使用", "AI结果验证", "AI业务应用", "AI安全意识"} and score < 55]
+            user_goal = expected_deliverable or core_goal or "尚未填写"
             fallback = (
-                f"工作风格倾向：你更适合以{profile_preview['primary_role']}场景中的真实项目为主线，配合导师示范和短周期复盘。\n\n"
-                f"当前AI协作成熟度：{diagnosis_preview['maturity_level']}，建议先强化{'、'.join(weak_dimensions[:2]) if weak_dimensions else 'AI结果验证和业务应用'}。\n\n"
-                f"可能的成长风险：目标交付为“{profile_preview['expected_deliverable'] or profile_preview['core_goal'] or '待确认'}”，如果只依赖AI初稿，容易缺少业务证据和人工判断。\n\n"
-                f"推荐训练方式：每周选择1个真实小任务，用AI整理材料，人负责判断结论，并请导师确认验收标准。\n\n"
-                f"适合的90天任务强度：{profile_preview['task_intensity']}。\n\n"
-                "依据：岗位类型、AI核验能力、学习方式、主观目标。"
+                f"1.我读取到的关键信息：你当前最想解决的问题是：{subjective_problem or '尚未填写'}；"
+                f"你希望AI帮忙的任务是：{ai_help_tasks or '尚未填写'}；预期交付是：{user_goal}。\n\n"
+                f"2.工作风格倾向：你更适合以{profile_preview['primary_role']}场景中的真实项目为主线，配合导师示范和短周期复盘。\n\n"
+                f"3.AI协作成熟度：{diagnosis_preview['maturity_level']}，建议先强化{'、'.join(weak_dimensions[:2]) if weak_dimensions else 'AI结果验证和业务应用'}。\n\n"
+                f"4.当前成长风险：围绕“{user_goal}”推进时，如果只依赖AI初稿，容易缺少业务证据和人工判断；"
+                f"{'同时需要处理“' + subjective_problem + '”。' if subjective_problem else '当前主观卡点尚未补充，建议继续明确。'}\n\n"
+                f"5.推荐训练方式：每周选择1个真实小任务，用AI辅助{ai_help_tasks or '整理材料、检查遗漏'}，但由本人判断结论，并请导师确认验收标准。\n\n"
+                f"6.适合任务强度：{profile_preview['task_intensity']}。\n\n"
+                "7.判断依据：岗位类型、AI核验能力、学习方式、主观目标、预期交付和希望AI协助的任务。"
             )
             prompt = (
                 f"画像：{profile_preview}\nAI诊断：{diagnosis_preview}\n"
-                f"主观成长问题：{st.session_state.wizard_subjective_problem}\n"
-                f"希望AI帮助：{st.session_state.wizard_ai_help_tasks}\n"
-                "请输出工作风格倾向、AI协作成熟度、成长风险、推荐训练方式、适合任务强度，并列出判断依据。"
+                "请必须结合以下用户主观输入进行分析：\n"
+                f"主观成长问题：{subjective_problem or '尚未填写'}\n"
+                f"希望AI帮忙的任务：{ai_help_tasks or '尚未填写'}\n"
+                f"预期交付：{expected_deliverable or '尚未填写'}\n"
+                f"90天核心目标：{core_goal or '尚未填写'}\n\n"
+                "输出结构必须包括：\n"
+                "1.我读取到的关键信息\n"
+                "2.工作风格倾向\n"
+                "3.AI协作成熟度\n"
+                "4.当前成长风险\n"
+                "5.推荐训练方式\n"
+                "6.适合任务强度\n"
+                "7.判断依据\n\n"
+                "如果主观输入为空，不要编造用户需求。"
             )
             st.session_state.ai_profile_interpretation = optional_ai_text("AI画像解读", prompt, fallback)
+            st.session_state.ai_profile_signature = signature
         if st.session_state.ai_profile_interpretation:
-            render_ai_output(st.session_state.ai_profile_interpretation)
+            current_profile = collect_profile()
+            current_diagnosis = calculate_ai_diagnosis({key: st.session_state[key] for key in AI_QUESTIONS})
+            current_signature = build_profile_input_signature(current_profile, current_diagnosis)
+            if st.session_state.get("ai_profile_signature") != current_signature:
+                st.info("画像信息已变更，请点击“重新生成AI画像解读”获取最新结果。")
+            else:
+                render_ai_output(st.session_state.ai_profile_interpretation)
     wizard_navigation(step)
 
 
