@@ -248,7 +248,7 @@ def inject_styles() -> None:
         .hero-shell{display:grid;grid-template-columns:1.15fr .85fr;gap:1.5rem;padding:2.7rem 3rem;border:1px solid #E5EAF2;border-radius:30px;background:linear-gradient(125deg,#F4F8FF 0%,#FFF5FA 56%,#FFF9EE 100%);box-shadow:0 20px 50px rgba(72,82,110,.10);overflow:hidden}.hero-kicker{color:var(--blue);font-size:.78rem;font-weight:850;letter-spacing:.14em}.hero-copy h1{font-size:3.15rem;line-height:1.1;margin:.55rem 0 1rem}.hero-copy p{font-size:1.05rem;color:var(--muted);line-height:1.8}.hero-note{margin-top:1rem;color:#7D8798;font-size:.84rem}.orbit{position:relative;min-height:320px}.orbit-track{position:absolute;inset:35px 20px;border:2px dashed #C9D9F8;border-radius:50%}.orbit-center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:112px;height:112px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#5B8FF9,#9B8AFB);color:white;font-weight:850;box-shadow:0 16px 30px rgba(91,143,249,.22)}.orbit-card{position:absolute;padding:.65rem .8rem;background:white;border:1px solid var(--line);border-radius:14px;box-shadow:0 8px 22px rgba(56,68,98,.09);font-size:.8rem;font-weight:750;animation:float 4s ease-in-out infinite}.orbit-card.one{left:4%;top:16%;border-top:4px solid var(--sky)}.orbit-card.two{right:2%;top:21%;border-top:4px solid var(--mint);animation-delay:.7s}.orbit-card.three{left:9%;bottom:13%;border-top:4px solid var(--purple);animation-delay:1.4s}.orbit-card.four{right:3%;bottom:10%;border-top:4px solid var(--pink);animation-delay:2.1s}@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
         .glass{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:1.15rem 1.2rem;box-shadow:0 10px 28px rgba(53,65,92,.08);transition:transform .2s ease,box-shadow .2s ease}.glass:hover,.insight:hover,.world-node:hover{transform:translateY(-3px);box-shadow:0 15px 32px rgba(53,65,92,.11)}.feature-card{min-height:148px;border-top:5px solid var(--blue)}.feature-card.mentor{border-top-color:var(--purple)}.feature-card.hr{border-top-color:var(--orange)}.feature-no{color:var(--blue);font-size:.74rem;font-weight:850}.feature-title{font-size:1.05rem;font-weight:780;margin:.45rem 0}.feature-text{color:var(--muted);font-size:.87rem;line-height:1.65}
         .section-title{font-size:1.4rem;font-weight:850;margin:1.6rem 0 .75rem}.section-sub{color:var(--muted);margin-top:-.4rem;margin-bottom:1rem}.step-line{display:grid;grid-template-columns:repeat(5,1fr);gap:.65rem;margin:1rem 0 1.4rem}.step{padding:.75rem;border-radius:14px;text-align:center;background:#F5F6F8;border:1px solid #EAECF0;color:#98A2B3;font-size:.8rem;transition:.2s}.step:before{content:"○";margin-right:.35rem}.step.done{color:#3D7F6B;background:var(--mint-soft);border-color:#C8F0E3}.step.done:before{content:"✓"}.step.active{color:white;background:var(--step-color,var(--blue));border-color:transparent;transform:scale(1.035);box-shadow:0 8px 20px rgba(91,143,249,.18)}.step-1{--step-color:var(--blue)}.step-2{--step-color:var(--orange)}.step-3{--step-color:var(--purple)}.step-4{--step-color:var(--mint)}.step-5{--step-color:var(--pink)}
-        .wizard-banner{padding:1rem 1.2rem;border-radius:18px;margin-bottom:1rem;border:1px solid var(--line)}.wizard-banner.step-1{background:var(--blue-soft)}.wizard-banner.step-2{background:var(--orange-soft)}.wizard-banner.step-3{background:var(--purple-soft)}.wizard-banner.step-4{background:var(--mint-soft)}.wizard-banner.step-5{background:var(--pink-soft)}.demo-tag{display:inline-block;color:#8A6411;background:var(--yellow-soft);border:1px solid #F2DE93;padding:.24rem .6rem;border-radius:99px;font-size:.76rem;font-weight:750}.ai-note{padding:.9rem 1rem;border-left:4px solid var(--mint);background:var(--mint-soft);border-radius:12px;color:#356B5C;font-size:.88rem}.insight{padding:1rem;border-radius:18px;background:white;border:1px solid var(--line);box-shadow:0 8px 22px rgba(53,65,92,.06);min-height:132px;transition:.2s}.insight h4{margin:0 0 .55rem}.insight p{color:var(--muted);font-size:.86rem;line-height:1.65;margin:0}
+        .wizard-banner{padding:1rem 1.2rem;border-radius:18px;margin-bottom:1rem;border:1px solid var(--line)}.wizard-banner.step-1{background:var(--blue-soft)}.wizard-banner.step-2{background:var(--orange-soft)}.wizard-banner.step-3{background:var(--purple-soft)}.wizard-banner.step-4{background:var(--mint-soft)}.wizard-banner.step-5{background:var(--pink-soft)}.demo-tag{display:inline-block;color:#8A6411;background:var(--yellow-soft);border:1px solid #F2DE93;padding:.24rem .6rem;border-radius:99px;font-size:.76rem;font-weight:750}.ai-note{padding:.9rem 1rem;border-left:4px solid var(--mint);background:var(--mint-soft);border-radius:12px;color:#356B5C;font-size:.88rem}.hint-card{padding:1rem 1.1rem;border-radius:18px;background:linear-gradient(180deg,#F5F8FF 0%,#EEF3FF 100%);border:1px solid #D8E3F5;margin:.7rem 0 1rem;box-shadow:0 8px 20px rgba(53,65,92,.045)}.hint-title{font-size:1.02rem;font-weight:760;color:#273142;margin-bottom:.6rem;line-height:1.5}.hint-list{margin:0;padding-left:1.2rem}.hint-list li{margin:.28rem 0;line-height:1.7;color:#4B5870}.insight{padding:1rem;border-radius:18px;background:white;border:1px solid var(--line);box-shadow:0 8px 22px rgba(53,65,92,.06);min-height:132px;transition:.2s}.insight h4{margin:0 0 .55rem}.insight p{color:var(--muted);font-size:.86rem;line-height:1.65;margin:0}
         .world-map{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;position:relative;margin:1.2rem 0 1.5rem}.world-map:before{content:"";position:absolute;left:8%;right:8%;top:47%;border-top:2px dashed #D7DCE5;z-index:0}.world-node{position:relative;z-index:1;padding:1rem;border-radius:20px;background:var(--node-soft,#F7F8FA);border:1px solid var(--line);min-height:184px;transition:.2s}.world-node.unlocked{border-color:var(--node-color,#B8C4D6)}.world-node.active{transform:translateY(-5px);border-color:var(--node-color,var(--blue));box-shadow:0 16px 30px rgba(53,65,92,.12)}.world-node.locked{background:#FAFAFA;color:#98A2B3}.node-index{display:inline-flex;width:34px;height:34px;border-radius:50%;align-items:center;justify-content:center;background:var(--node-color,#D0D5DD);color:white;font-weight:850}.node-status{float:right;font-size:.7rem;padding:.22rem .55rem;border-radius:99px;background:white;color:var(--muted);border:1px solid var(--line)}.node-title{font-weight:850;margin:.8rem 0 .25rem}.node-range{font-size:.74rem;color:var(--node-color,var(--blue));font-weight:750}.node-goal{font-size:.82rem;color:var(--muted);line-height:1.5;margin-top:.5rem}.node-xp{margin-top:.7rem;color:var(--purple);font-size:.78rem;font-weight:750}
         .boundary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.65rem}.boundary{padding:.8rem;border-radius:12px;background:#FAFBFC;border:1px solid var(--line);color:var(--muted);font-size:.84rem}.boundary strong{display:block;color:var(--blue);margin-bottom:.25rem}.risk-low,.risk-medium,.risk-high{display:inline-block;padding:.22rem .65rem;border-radius:99px;font-size:.76rem;font-weight:800}.risk-low{color:#347B65;background:var(--mint-soft)}.risk-medium{color:#9A6B00;background:var(--yellow-soft)}.risk-high{color:#B43C3C;background:#FFF0F0}
         .event-hero{padding:1.35rem 1.45rem;border-radius:20px;background:linear-gradient(120deg,var(--blue-soft),var(--purple-soft));border:1px solid #DDE7FA}.event-week{font-size:.74rem;color:var(--blue);font-weight:850;letter-spacing:.12em}.event-title{font-size:1.45rem;font-weight:850;margin:.4rem 0}.event-detail{color:var(--muted);line-height:1.7}.decision-card{padding:1rem 1.1rem;border-radius:16px;background:linear-gradient(120deg,var(--mint-soft),var(--purple-soft));border:1px solid var(--line);color:var(--text)}.timeline-row{display:grid;grid-template-columns:65px 18px 1fr;gap:.7rem;align-items:start;padding:.35rem 0}.timeline-week{color:#98A2B3;font-size:.78rem;text-align:right}.timeline-dot{width:12px;height:12px;border-radius:50%;background:#E1E4E9;margin-top:.2rem}.timeline-dot.done{background:var(--mint)}.timeline-dot.current{background:var(--orange);box-shadow:0 0 0 5px rgba(255,180,91,.16)}.timeline-text{color:#98A2B3;font-size:.83rem}.timeline-text.done,.timeline-text.current{color:var(--text)}.brief{padding:1.1rem 1.2rem;border-radius:16px;background:linear-gradient(135deg,var(--blue-soft),var(--purple-soft));border:1px solid var(--line);color:var(--text);line-height:1.75}.focus-person{padding:.8rem;border-radius:13px;background:white;border:1px solid var(--line);box-shadow:0 6px 18px rgba(53,65,92,.05);margin:.45rem 0}.focus-meta{font-size:.78rem;color:var(--muted);margin-top:.2rem}.summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.7rem}.summary-item{background:var(--surface-soft);border:1px solid var(--line);border-radius:13px;padding:.8rem}.summary-label{font-size:.72rem;color:#98A2B3}.summary-value{margin-top:.25rem;font-weight:750;color:var(--text)}
@@ -384,7 +384,16 @@ def clear_ai_output(key: str) -> None:
 
 
 def render_ai_prereq_hint(title: str, items: list[str]) -> None:
-    st.info(title + "\n\n" + "\n".join(f"• {item}" for item in items))
+    list_html = "".join(f"<li>{escape(item)}</li>" for item in items)
+    st.markdown(
+        f"""
+        <div class="hint-card">
+          <div class="hint-title">{escape(title)}</div>
+          <ul class="hint-list">{list_html}</ul>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def profile_is_ready() -> bool:
@@ -763,11 +772,19 @@ def render_home() -> None:
             '<br><span style="color:#667085">无API时使用本地规则稳定模式，有API时自动启用AI增强。</span></div>',
             unsafe_allow_html=True,
         )
-    st.caption("本功能依赖已生成的画像和成长计划。请先进入：成长旅程/智能画像，第2步填写预期交付，第4步填写主观成长问题和希望AI帮忙的任务，第5步确认90天核心目标。")
+    render_ai_prereq_hint(
+        "使用今日成长建议前，请先确认这些信息：",
+        [
+            "已生成新人画像和成长计划。",
+            "智能画像第2步：填写“90天内预期交付成果”。",
+            "智能画像第4步：填写“主观成长问题”和“希望AI帮忙的任务”。",
+            "智能画像第5步：确认“90天核心目标”。",
+        ],
+    )
     if st.button("让AI帮我生成今日成长建议", type="primary", key="home_ai_advice"):
         if not profile_is_ready():
             clear_ai_output("ai_today_advice")
-            st.warning("请先完成智能画像五步并生成成长策略，或点击首页“一键体验完整90天”载入模拟画像后，再生成今日成长建议。")
+            st.warning("请先补齐必要信息，再生成今日成长建议。")
             render_ai_prereq_hint(
                 "生成今日成长建议前，需要先补充这些信息：",
                 [
@@ -985,7 +1002,16 @@ def render_wizard() -> None:
             if not any([subjective_problem, ai_help_tasks, expected_deliverable, core_goal]):
                 clear_ai_output("ai_profile_interpretation")
                 st.session_state.ai_profile_signature = ""
-                st.warning("请先补充至少一个关键变量：第2步“90天内预期交付成果”、第4步“主观成长问题/希望AI帮忙的任务”，或第5步“90天核心目标”，再生成AI画像解读。")
+                st.warning("请先补充至少一个关键变量，再生成AI画像解读。")
+                render_ai_prereq_hint(
+                    "AI画像解读至少需要以下任意一类信息：",
+                    [
+                        "第2步“工作场景”：90天内预期交付成果。",
+                        "第4步“学习方式”：主观成长问题。",
+                        "第4步“学习方式”：希望AI帮忙的任务。",
+                        "第5步“确认目标”：90天核心目标。",
+                    ],
+                )
                 return
             profile_preview = collect_profile()
             diagnosis_preview = calculate_ai_diagnosis({key: st.session_state[key] for key in AI_QUESTIONS})
@@ -1142,7 +1168,15 @@ def render_diagnosis_report() -> None:
         st.warning(risk)
     st.markdown("### AI诊断摘要")
     render_ai_mode_hint()
-    st.caption("本摘要依赖已完成的智能画像和成长目标。若内容不准确，请回到智能画像第2步修改预期交付、第4步修改主观成长问题、第5步修改90天核心目标后重新生成诊断。")
+    render_ai_prereq_hint(
+        "AI诊断摘要会依据这些画像信息生成：",
+        [
+            "已完成智能画像和成长目标确认。",
+            "如内容不准确，请回到智能画像第2步修改“预期交付”。",
+            "如主观目标变化，请回到第4步修改“主观成长问题”。",
+            "如90天方向变化，请回到第5步修改“90天核心目标”后重新生成诊断。",
+        ],
+    )
     tone = st.radio("选择报告口吻", ["严肃导师版", "鼓励陪伴版", "HR汇报版"], horizontal=True, key="ai_diagnosis_tone")
     if st.button("AI解读我的诊断结果", key="generate_ai_diagnosis_summary"):
         if not profile_is_ready():
@@ -1600,7 +1634,14 @@ def render_growth_map() -> None:
     )
     with st.expander("AI任务配置器", expanded=False):
         render_ai_mode_hint()
-        st.caption("请至少填写“当前最紧急业务任务”或“最担心的能力短板”，否则AI无法判断本周排序依据。")
+        render_ai_prereq_hint(
+            "AI任务配置器需要这些排序依据：",
+            [
+                "至少填写“当前最紧急业务任务”。",
+                "或至少填写“最担心的能力短板”。",
+                "本周可投入时间会用于判断任务难度和导师介入建议。",
+            ],
+        )
         c1, c2, c3 = st.columns(3)
         with c1:
             weekly_hours = st.number_input("本周可投入时间", min_value=1, max_value=40, value=int(profile.get("weekly_growth_hours", 6)), key="ai_growth_hours")
@@ -1611,7 +1652,14 @@ def render_growth_map() -> None:
         if st.button("AI调整本周成长路径", key="generate_ai_growth_config"):
             if not has_text(urgent_task, weak_spot):
                 clear_ai_output("ai_growth_config")
-                st.warning("请先填写“当前最紧急业务任务”或“最担心的能力短板”，再生成本周成长路径调整建议。")
+                st.warning("请先补充排序依据，再生成本周成长路径调整建议。")
+                render_ai_prereq_hint(
+                    "请至少补充以下任意一项：",
+                    [
+                        "当前最紧急业务任务。",
+                        "最担心的能力短板。",
+                    ],
+                )
             else:
                 open_tasks = [task for task in plan if task["status"] not in {"已完成"}]
                 priority_tasks = open_tasks[:2]
@@ -1899,7 +1947,14 @@ def render_auto_demo() -> None:
     render_demo_disclaimer()
     st.markdown('<div class="section-title">90天自动演示</div>', unsafe_allow_html=True)
     st.markdown(f'<div class="section-sub">通过{len(DEMO_EVENTS)}个关键事件展示系统如何监测成长、评价证据、调整任务、触发导师介入并形成组织信号。</div>', unsafe_allow_html=True)
-    st.caption("请先点击“随机生成一次90天成长剧本”，系统才会基于随机剧本和当前演示事件生成AI旁白。")
+    render_ai_prereq_hint(
+        "生成AI旁白前，请先完成：",
+        [
+            "点击“随机生成一次90天成长剧本”。",
+            "确认本轮随机剧本已显示在页面中。",
+            "系统会结合随机剧本和当前演示事件生成旁白。",
+        ],
+    )
     if st.button("随机生成一次90天成长剧本", key="randomize_demo_script"):
         seed = random.randint(1000, 999999)
         rng = random.Random(seed)
@@ -1925,7 +1980,15 @@ def render_auto_demo() -> None:
         if st.button("生成AI旁白", key="generate_demo_narration"):
             if not st.session_state.demo_random_script:
                 clear_ai_output("ai_demo_narration")
-                st.warning("请先随机生成一次90天成长剧本，再生成AI旁白。")
+                st.warning("请先生成随机剧本，再生成AI旁白。")
+                render_ai_prereq_hint(
+                    "AI旁白需要以下前置内容：",
+                    [
+                        "本轮90天随机成长剧本。",
+                        "当前自动演示事件。",
+                        "系统调整说明。",
+                    ],
+                )
             else:
                 event = DEMO_EVENTS[min(st.session_state.demo_step, len(DEMO_EVENTS) - 1)]
                 event_title = event.get("title", "当前事件")
@@ -2111,7 +2174,15 @@ def render_weekly_review() -> None:
         st.rerun()
     with st.expander("AI复盘教练", expanded=False):
         render_ai_mode_hint()
-        st.caption("请至少填写“本周做成了什么/哪里卡住了/下周最想改善什么”之一，或先点击“加载模拟复盘”。")
+        render_ai_prereq_hint(
+            "AI复盘教练需要至少一类复盘信息：",
+            [
+                "填写“本周做成了什么”。",
+                "或填写“本周哪里卡住了”。",
+                "或填写“下周最想改善什么”。",
+                "也可以先点击“加载模拟复盘”，再生成反馈。",
+            ],
+        )
         left, middle, right = st.columns(3)
         with left:
             st.text_area("本周做成了什么？", key="review_subjective_done")
@@ -2131,7 +2202,16 @@ def render_weekly_review() -> None:
             )
             if not has_review_input:
                 clear_ai_output("ai_review_feedback")
-                st.warning("请先填写至少一项复盘内容，或点击“加载模拟复盘”，再生成AI复盘反馈。")
+                st.warning("请先补充复盘内容，再生成AI复盘反馈。")
+                render_ai_prereq_hint(
+                    "请至少完成以下任意一项：",
+                    [
+                        "填写本周做成了什么。",
+                        "填写本周哪里卡住了。",
+                        "填写下周最想改善什么。",
+                        "点击“加载模拟复盘”。",
+                    ],
+                )
             else:
                 fallback_risk = "暂无明显风险" if len(st.session_state.review_unfinished) <= 1 and st.session_state.review_confidence >= 3 else "存在任务延期或信心不足风险"
                 fallback = (
@@ -2357,12 +2437,27 @@ def render_mentor_panel() -> None:
     )
     with st.expander("AI导师追问生成器", expanded=False):
         render_ai_mode_hint()
-        st.caption("请先输入新人提交的成果摘要、证据描述或导师观察，AI才会生成追问。")
+        render_ai_prereq_hint(
+            "生成导师追问前，请先输入：",
+            [
+                "新人提交的成果摘要。",
+                "或成果证据描述。",
+                "或导师观察到的具体问题。",
+            ],
+        )
         mentor_observation = st.text_area("请输入新人提交的成果摘要或导师观察", key="ai_mentor_observation")
         if st.button("生成导师追问", key="generate_ai_mentor_questions"):
             if not has_text(mentor_observation):
                 clear_ai_output("ai_mentor_questions")
                 st.warning("请先输入新人提交的成果摘要或导师观察，再生成导师追问。")
+                render_ai_prereq_hint(
+                    "可输入的内容示例：",
+                    [
+                        "新人提交的成果摘要。",
+                        "成果证据、AI使用方式或验证记录。",
+                        "导师观察到的卡点、风险或不确定结论。",
+                    ],
+                )
             else:
                 fallback = (
                     f"基于导师观察“{mentor_observation}”，建议追问：\n\n"
@@ -2513,7 +2608,14 @@ def render_hr_dashboard() -> None:
     st.markdown(f'<div class="brief">{escape(fallback_brief)}</div>', unsafe_allow_html=True)
     st.markdown("### AI组织洞察")
     render_ai_mode_hint()
-    st.caption("请先填写HR本周关注点或组织问题。AI只会基于模拟批次数据和你填写的关注点生成组织洞察。")
+    render_ai_prereq_hint(
+        "生成HR组织洞察前，请先补充关注点：",
+        [
+            "填写HR本周最关心的组织问题。",
+            "系统只会基于模拟批次数据和你填写的关注点生成组织洞察。",
+            "AI输出仅用于辅助分析，不能替代HR判断。",
+        ],
+    )
     ai_hr_focus = st.text_area(
         "请输入本周HR关注点或组织问题",
         key="ai_hr_focus",
@@ -2523,6 +2625,15 @@ def render_hr_dashboard() -> None:
         if not has_text(ai_hr_focus):
             clear_ai_output("ai_hr_insight")
             st.warning("请先填写本周HR关注点或组织问题，再生成AI组织洞察简报。")
+            render_ai_prereq_hint(
+                "可以从这些角度填写关注点：",
+                [
+                    "高风险新人集中在哪些岗位。",
+                    "导师负载是否过高。",
+                    "AI结果验证能力是否需要集中训练。",
+                    "真实业务机会是否不足。",
+                ],
+            )
         else:
             fallback = (
                 f"围绕HR本周关注点“{ai_hr_focus}”，当前新人群体风险为：{high}名高风险、{medium}名需要关注，主要障碍集中在AI结果验证、真实业务机会和跨团队协作。\n\n"
